@@ -48,13 +48,14 @@ FROM ubuntu:22.04 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Solo las librerías necesarias en runtime
+# Instalamos los paquetes dev/estables para garantizar que existan sin errores de version
 RUN apt-get update && apt-get install -y \
-    libssl3 \
+    libssl-dev \
     zlib1g \
-    libjsoncpp25 \
-    libcares2 \
-    libbrotlidec1 \
+    libjsoncpp-dev \
+    libcares-dev \
+    libbrotli-dev \
+    uuid-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

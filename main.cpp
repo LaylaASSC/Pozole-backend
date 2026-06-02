@@ -7,30 +7,28 @@ int main() {
     const char* portEnv = std::getenv("PORT");
     int port = portEnv ? std::stoi(std::string(portEnv)) : 8080;
 
-    // Permitir CORS para el frontend (acepta cualquier origen)
-    drogon::app().registerPreHandlingAdvice(
-        [](const drogon::HttpRequestPtr& req,
-           std::function<void(const drogon::HttpResponsePtr&)>&& stop,
-           std::function<void()>&& next) {
-            // Manejar peticiones preflight OPTIONS (CORS)
+    // Interceptar cualquier OPTIONS agresivamente antes de que Drogon busque la ruta
+    drogon::app().registerSyncAdvice(
+        [](const drogon::HttpRequestPtr& req) -> drogon::HttpResponsePtr {
             if (req->method() == drogon::Options) {
                 auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->addHeader("Access-Control-Allow-Origin", "*");
-                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+                resp->addHeader("Access-Control-Max-Age", "86400");
                 resp->setStatusCode(drogon::k204NoContent);
-                stop(resp);
-            } else {
-                next();
+                return resp; // Responde de inmediato
             }
+            return nullptr; // Continúa normal
         }
     );
 
+    // Adjuntar headers CORS a todas las respuestas exitosas o errores
     drogon::app().registerPostHandlingAdvice(
         [](const drogon::HttpRequestPtr&, const drogon::HttpResponsePtr& resp) {
             resp->addHeader("Access-Control-Allow-Origin", "*");
-            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
         }
     );
 
