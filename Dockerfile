@@ -48,14 +48,14 @@ FROM ubuntu:22.04 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalamos los paquetes dev/estables para garantizar que existan sin errores de version
+# Instalamos los mismos paquetes exactos que en el builder (sin las herramientas de compilación)
 RUN apt-get update && apt-get install -y \
     libssl-dev \
-    zlib1g \
+    zlib1g-dev \
     libjsoncpp-dev \
+    uuid-dev \
     libcares-dev \
     libbrotli-dev \
-    uuid-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

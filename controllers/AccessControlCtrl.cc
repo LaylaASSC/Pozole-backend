@@ -1,4 +1,7 @@
 #include "AccessControlCtrl.h"
+#include <string>
+#include <vector>
+#include <mutex>
 
 AccessControlCtrl::AccessControlCtrl() {
     std::string datos[10][2] = {
