@@ -1,26 +1,18 @@
-# =============================================
-# Single-stage: Ubuntu 22.04 con paquetes correctos
-# =============================================
-FROM ubuntu:22.04
+# buildpack-deps:jammy = Ubuntu 22.04 con gcc, g++, cmake, git,
+# make, libssl-dev, zlib1g-dev ya instalados.
+# Solo necesitamos unos pocos paquetes extras.
+FROM buildpack-deps:jammy AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Paquetes exactos de la documentación oficial de Drogon para Ubuntu 22.04
+# Solo los paquetes que buildpack-deps NO incluye
 RUN apt-get update && apt-get install -y \
-    git \
-    gcc \
-    g++ \
-    cmake \
-    make \
-    pkg-config \
-    libssl-dev \
-    zlib1g-dev \
     libjsoncpp-dev \
     uuid-dev \
     libcares-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Compilar Drogon desde fuente (sin brotli ni hiredis)
+# Compilar Drogon desde fuente
 WORKDIR /deps
 RUN git clone --depth=1 --recurse-submodules https://github.com/drogonframework/drogon.git && \
     cd drogon && mkdir build && cd build && \
@@ -30,8 +22,7 @@ RUN git clone --depth=1 --recurse-submodules https://github.com/drogonframework/
         -DBUILD_ORM=OFF \
         -DCMAKE_DISABLE_FIND_PACKAGE_Hiredis=ON \
         -DCMAKE_DISABLE_FIND_PACKAGE_Brotli=ON && \
-    make -j$(nproc) && make install && \
-    ldconfig
+    make -j$(nproc) && make install && ldconfig
 
 # Compilar el backend
 WORKDIR /app
@@ -42,5 +33,4 @@ RUN mkdir -p build && cd build && \
 
 ENV PORT=8080
 EXPOSE 8080
-
 CMD ["/app/build/PozoleBackend"]
