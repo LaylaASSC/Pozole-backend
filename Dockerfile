@@ -1,7 +1,7 @@
 # =============================================
-# Etapa 1: BUILD - Compila el binario C++
+# BUILD & RUNTIME (Single Stage)
 # =============================================
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -41,32 +41,8 @@ RUN mkdir build && cd build && \
     cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release && \
     ninja
 
-# =============================================
-# Etapa 2: RUNTIME - Imagen final liviana
-# =============================================
-FROM ubuntu:22.04 AS runtime
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Instalamos los mismos paquetes exactos que en el builder (sin las herramientas de compilación)
-RUN apt-get update && apt-get install -y \
-    libssl-dev \
-    zlib1g-dev \
-    libjsoncpp-dev \
-    uuid-dev \
-    libcares-dev \
-    libbrotli-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copiar el binario compilado desde la etapa de build
-COPY --from=builder /app/build/PozoleBackend /app/PozoleBackend
-COPY --from=builder /usr/local/lib/libdrogon.a /usr/local/lib/
-COPY --from=builder /usr/local/lib/libtrantor.a /usr/local/lib/
-
 # Render asigna el puerto via variable de entorno PORT
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["/app/PozoleBackend"]
+CMD ["/app/build/PozoleBackend"]
