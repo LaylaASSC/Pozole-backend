@@ -1,0 +1,3 @@
+F:/proyectos/Pozole-backend/build/CMakeFiles/PozoleBackend.dir
+F:/proyectos/Pozole-backend/build/CMakeFiles/edit_cache.dir
+F:/proyectos/Pozole-backend/build/CMakeFiles/rebuild_cache.dir

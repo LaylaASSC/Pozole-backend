@@ -4,6 +4,9 @@ project(PozoleBackend CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Rutas de instalación de Drogon (MSYS2 ucrt64)
+list(APPEND CMAKE_PREFIX_PATH "C:/msys64/ucrt64")
+
 find_package(drogon CONFIG REQUIRED)
 
 file(GLOB_RECURSE SRC_FILES
@@ -12,4 +15,4 @@ file(GLOB_RECURSE SRC_FILES
 )
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
-target_link_libraries(${PROJECT_NAME} PRIVATE drogon::drogon)
+target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
