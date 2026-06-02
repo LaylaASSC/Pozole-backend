@@ -1,26 +1,26 @@
 # =============================================
-# Single-stage: build y run en la misma imagen
-# Más simple y confiable en Render
+# Single-stage: Ubuntu 22.04 con paquetes correctos
 # =============================================
-FROM debian:bookworm-slim
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
+# Paquetes exactos de la documentación oficial de Drogon para Ubuntu 22.04
+RUN apt-get update && apt-get install -y \
     git \
+    gcc \
+    g++ \
+    cmake \
+    make \
     pkg-config \
     libssl-dev \
     zlib1g-dev \
     libjsoncpp-dev \
     uuid-dev \
-    libbrotli-dev \
     libcares-dev \
-    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Compilar Drogon desde fuente
+# Compilar Drogon desde fuente (sin brotli ni hiredis)
 WORKDIR /deps
 RUN git clone --depth=1 --recurse-submodules https://github.com/drogonframework/drogon.git && \
     cd drogon && mkdir build && cd build && \
@@ -28,7 +28,8 @@ RUN git clone --depth=1 --recurse-submodules https://github.com/drogonframework/
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_CTL=OFF \
         -DBUILD_ORM=OFF \
-        -DCMAKE_DISABLE_FIND_PACKAGE_Hiredis=ON && \
+        -DCMAKE_DISABLE_FIND_PACKAGE_Hiredis=ON \
+        -DCMAKE_DISABLE_FIND_PACKAGE_Brotli=ON && \
     make -j$(nproc) && make install && \
     ldconfig
 
