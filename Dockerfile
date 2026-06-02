@@ -6,7 +6,8 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Instalar dependencias de sistema
-RUN apt-get update && apt-get install -y \
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     ninja-build \
@@ -18,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     uuid-dev \
     libcares-dev \
     libbrotli-dev \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Clonar y compilar Drogon desde fuente
