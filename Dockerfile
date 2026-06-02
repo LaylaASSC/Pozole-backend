@@ -1,50 +1,26 @@
 # =============================================
-# BUILD & RUNTIME (Single Stage)
+# Etapa 1: BUILD - Usa imagen oficial de Drogon
+# (Ya tiene todo compilado: drogon, jsoncpp, openssl, etc.)
 # =============================================
-FROM ubuntu:22.04
+FROM drogonframework/drogon:latest AS builder
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Instalar dependencias de sistema
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
-    ninja-build \
-    git \
-    pkg-config \
-    libssl-dev \
-    zlib1g-dev \
-    libjsoncpp-dev \
-    uuid-dev \
-    libcares-dev \
-    libbrotli-dev \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Clonar y compilar Drogon desde fuente
-WORKDIR /deps
-RUN git clone --recurse-submodules https://github.com/drogonframework/drogon.git && \
-    cd drogon && \
-    mkdir build && cd build && \
-    cmake .. -G Ninja \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DBUILD_EXAMPLES=OFF \
-        -DBUILD_CTL=OFF \
-        -DBUILD_ORM=OFF \
-        -DCMAKE_DISABLE_FIND_PACKAGE_Hiredis=ON \
-        -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=OFF && \
-    ninja && ninja install
-
-# Compilar el proyecto Pozole Backend
 WORKDIR /app
 COPY . .
-RUN mkdir build && cd build && \
-    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release && \
-    ninja
 
-# Render asigna el puerto via variable de entorno PORT
+RUN mkdir -p build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc)
+
+# =============================================
+# Etapa 2: RUNTIME - Copia solo el binario
+# =============================================
+FROM drogonframework/drogon:latest AS runtime
+
+WORKDIR /app
+COPY --from=builder /app/build/PozoleBackend .
+
+# Render asigna el puerto vía variable de entorno PORT
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["/app/build/PozoleBackend"]
+CMD ["/app/PozoleBackend"]
