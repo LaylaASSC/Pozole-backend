@@ -1,12 +1,18 @@
-# buildpack-deps:jammy = Ubuntu 22.04 con gcc, g++, cmake, git,
-# make, libssl-dev, zlib1g-dev ya instalados.
-# Solo necesitamos unos pocos paquetes extras.
-FROM buildpack-deps:jammy AS builder
+# Este Dockerfile es compilado por GitHub Actions (no por Render)
+# GitHub Actions tiene acceso completo a internet para apt-get
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Solo los paquetes que buildpack-deps NO incluye
 RUN apt-get update && apt-get install -y \
+    git \
+    gcc \
+    g++ \
+    cmake \
+    make \
+    pkg-config \
+    libssl-dev \
+    zlib1g-dev \
     libjsoncpp-dev \
     uuid-dev \
     libcares-dev \
